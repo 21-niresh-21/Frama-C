@@ -1,0 +1,113 @@
+FUNCTION CONTRACTS:
+    
+    1.precondition (when using the rte guard this is mandatory) :
+              
+              1.1.Preconditions can be given as per your needs but then when you are using the rte guard you will have to check below:
+             
+              1.2.Using primitive datatypes:
+                      
+                      1.2.1----Check for the overflow and underflow.-----set your preconditions so as to ensure there are no overflows to your data type.
+                            EXAMPLE---adding two numbers----add(int a,int b):
+                              Ensure that while adding the two numbers their final result don't exceed the limit of your data type(INT_MAX or INT_MIN).
+                              So we can set our precondition in such a way that there is no over flow.
+                              if we give the condition that our initial value don't exceed half of their max or min limit (as there are only two numbers involved) RTE can 
+                              be skipped.
+                                
+                                SYNTAX:
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                     #include <limits.h> ----> place where your MINs and MAXs are mentioned
+                                      
+                                    /*@
+                                       requires (INT_MIN/2 <= a <= INT_MAX/2) && (INT_MIN/2 <= b <= INT_MAX/2);
+                                       ensures \result == a+b;
+                                    */   
+                                    
+                                      int add(int a,int b){return a+b;}
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                      
+                                      
+                1.3 Using arrays:
+                       
+                       1.3.1------array index out of bounds------make sure the indexing variable of array stays within the size of array.
+                       
+                1.4 Using pointers:
+                       
+                       1.4.1------pointers--------pointers might point to some illegal memory or the so called dangling pointers might cause RTEs.
+                                
+                                1.4.1.1 to make sure the pointer is a valid one ----- 
+                                               \valid(pointer_variable)
+                                               
+                                1.4.1.2 if the pointer is either CONST or if it's pointing to a const variable:
+                                                if so:
+                                                    \valid_read(pointer_variable)
+                                                else:
+                                                    \valid(pointer_variable)
+                                
+                                1.2.3.2 if you are sure that no two pointers point to the same memory--
+                                                if so:
+                                                     \separated(a,b);
+                                                else: [nothing to specify]
+                             
+    
+   
+    
+    2.assigns ---- are we modifying any variables inside our function?
+              if so:
+                  assigns [the variables/pointers];
+              else:
+                  assigns \nothing;
+              
+    
+    
+    3.Postcondition (the main purpose of you to use frama-c)
+    
+            SYNTAX:
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                \\@ ensures [expected or expecting post-conditions];
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                
+                Two new logical connectors:
+                    " ==> "---implies   " <==> "----> equivalence
+                    implies can at times be used for a simple if..else or whatever it is that your expecting
+                    
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                \\ @ ensures ( a>=b ==> \result == a) && (b>a ==> \result == b);
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    
+    
+    
+    
+    4.Behaviors (used when there are any selection statements (if...else)):
+      
+      EXAMPLE:
+          if(a>=b){return a;}
+          else return b;
+              
+     behavior [any name]:-----------> it's more like naming a the if part ,else part OR more precisely giving a name to the condition.
+          assumes [condition];--------------------->if it is an else part mention the condition of negation of the top if/ifs.
+          ensures [outcome expected(post-condition)];
+          
+          TOWARDS THE END OF ALL BEHAVIORS:
+             complete behaviors -------------> if for any input the input goes into atleast one of the behaviors.
+             disjoint behaviors -------------> if for any input the input goes into exactly one of the behaviors.
+     
+     SYNTAX for the above if..else:
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        behavior a:
+            assumes a>=b;
+            ensures \result == a;
+        behavior b:
+            assumes a<b;
+            ensures \result == b;
+            
+        complete behaviors;
+        dijoint behaviors;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              
+   
+    
+    5.Assertions can be given between program statements as per your need in comments starting with @.
+     
+                \\ @ assert x == 6;
+    
+    
